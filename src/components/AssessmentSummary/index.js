@@ -7,6 +7,7 @@ const AssessmentSummary = props => {
     unansweredQuestions,
     questions,
     currentQuestionNo,
+    isSelected,
     onSubmit,
     onQuestionClick,
     selectedQuestionIndex,
@@ -50,7 +51,7 @@ const AssessmentSummary = props => {
         </ul>
       </div>
       <div className="submit-btn-card">
-        <button className="submit-btn" onClick={onSubmit}>
+        <button type="button" className="submit-btn" onClick={onSubmit}>
           Submit Assessment
         </button>
       </div>

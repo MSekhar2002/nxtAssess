@@ -1,6 +1,5 @@
-// import {Link} from 'react-router-dom'
+import {Link, Redirect} from 'react-router-dom'
 import Cookies from 'js-cookie'
-import {Redirect} from 'react-router-dom'
 import Header from '../Header'
 import './index.css'
 
@@ -33,9 +32,11 @@ const Home = () => {
               All the progress will be lost, if you reload during the assessment
             </li>
           </ol>
-          <button type="button" className="start-button">
-            Start Assessment
-          </button>
+          <Link to="/assessment">
+            <button type="button" className="start-button">
+              Start Assessment
+            </button>
+          </Link>
         </div>
         <div className="image-container">
           <img

@@ -1,6 +1,6 @@
 import './index.css'
 import Cookies from 'js-cookie'
-import {withRouter} from 'react-router-dom'
+import {withRouter, Link} from 'react-router-dom'
 
 const Header = props => {
   const onClickLogout = () => {
@@ -13,11 +13,13 @@ const Header = props => {
   return (
     <nav className="nav-container">
       <div className="item-container">
-        <img
-          src="https://res.cloudinary.com/dzaz9bsnw/image/upload/v1704821765/Group_8005_vgjmvh.jpg"
-          alt="website logo"
-          className="image"
-        />
+        <Link to="/">
+          <img
+            src="https://res.cloudinary.com/dzaz9bsnw/image/upload/v1704821765/Group_8005_vgjmvh.jpg"
+            alt="website logo"
+            className="image"
+          />
+        </Link>
       </div>
       <button onClick={onClickLogout} type="button" className="btn">
         Logout

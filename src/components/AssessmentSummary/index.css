@@ -89,6 +89,15 @@
   text-align: center;
 }
 
+.selected {
+  background-color: #60a5fa;
+}
+
+.answered-Selected {
+  background-color: #7c599f26;
+  border: 1px solid #7c599f;
+}
+
 .submit-btn {
   position: absolute;
   bottom: 0;
