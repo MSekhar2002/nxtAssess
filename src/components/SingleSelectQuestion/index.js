@@ -1,3 +1,5 @@
+import './single.css'
+
 const SingleSelectQuestion = props => {
   const {
     question,
@@ -6,20 +8,31 @@ const SingleSelectQuestion = props => {
     moveToNextQuestion,
   } = props
   return (
-    <div>
-      <h2>{question.questionText}</h2>
-      <select
-        value={selectedOption}
-        onChange={e => handleOptionSelect(e.target.value)}
-      >
-        <option value="">Select an option</option>
-        {question.options.map(option => (
-          <option key={option.optionId} value={option.optionId}>
-            {option.text}
-          </option>
-        ))}
-      </select>
-      <button type="button" onClick={moveToNextQuestion}>
+    <div className="single-select-container">
+      <h2 className="question-text-single">{question.questionText}</h2>
+      <hr className="horizontal-line-single" />
+      <div className="mini-card">
+        <select
+          className="select-card"
+          value={selectedOption}
+          onChange={e => handleOptionSelect(e.target.value)}
+        >
+          {question.options.map(option => (
+            <option
+              className={
+                selectedOption === option.optionId
+                  ? 'selectedOption'
+                  : 'normalOption'
+              }
+              key={option.optionId}
+              value={option.optionId}
+            >
+              {option.text}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button className="nxt-button" type="button" onClick={moveToNextQuestion}>
         Next Question
       </button>
     </div>

@@ -26,7 +26,8 @@ class Assessment extends Component {
     isSelected: false,
     selectedQuestionIndex: null,
     apiStatus: apiStatusConstants.initial,
-    timeUp: false,
+    timeUp: true,
+    anyOptionSelected: false,
   }
 
   componentDidMount() {
@@ -62,14 +63,14 @@ class Assessment extends Component {
   }
 
   startTimer = () => {
-    const {timer} = this.state
     this.timerFunction = setInterval(() => {
+      const {timer} = this.state
       if (timer > 0) {
         this.setState(prevState => ({timer: prevState.timer - 1}))
       } else {
         clearInterval(this.timerFunction)
-        // this.endAssessment()
-        this.setState({timeUp: true})
+        this.endAssessment()
+        this.setState({timeUp: false})
       }
     }, 1000)
   }
@@ -78,17 +79,17 @@ class Assessment extends Component {
     this.getData()
   }
 
-  //   endAssessment = () => {
-  //     const {history} = this.props
-  //     const {score} = this.state
+  endAssessment = () => {
+    const {history} = this.props
+    const {timeUp} = this.state
 
-  //     history.replace('/result', {score})
-  //     clearInterval(this.timerFunction)
+    history.replace('/result', {timeUp})
+    clearInterval(this.timerFunction)
 
-  //     this.setState({
-  //       timeUp: true,
-  //     })
-  //   }
+    this.setState({
+      timeUp: true,
+    })
+  }
 
   onSubmit = () => {
     const {history} = this.props
@@ -114,7 +115,6 @@ class Assessment extends Component {
       unansweredQuestions,
       score,
       isSelected,
-      timeUp,
       selectedQuestionIndex,
     } = this.state
     const minutes = Math.floor(timer / 60)
@@ -129,10 +129,6 @@ class Assessment extends Component {
           ? selectedQuestionIndex
           : currentQuestionIndex
       ]
-
-    if (timeUp) {
-      return <div>Time Up</div>
-    }
 
     return (
       <>
@@ -257,18 +253,25 @@ class Assessment extends Component {
       }))
     } else if (selectedOptions) {
       this.setState(prevState => ({
-        answeredQuestion: prevState.answeredQuestion + 1,
+        answeredQuestions: prevState.answeredQuestion + 1,
+        anyOptionSelected: true,
       }))
     }
-    this.setState({selectedOptions: optionId, isSelected: true})
+    this.setState({
+      selectedOptions: optionId,
+      isSelected: true,
+      anyOptionSelected: true,
+    })
   }
 
   moveToNextQuestion = () => {
-    const {isSelected, assQuestions, answeredQuestions} = this.state
-    if (isSelected) {
+    const {isSelected, anyOptionSelected} = this.state
+
+    if (isSelected || anyOptionSelected) {
       this.setState(prevState => ({
         answeredQuestions: prevState.answeredQuestions + 1,
         isSelected: false,
+        anyOptionSelected: false,
       }))
     }
     this.setState(prevState => ({
@@ -282,6 +285,7 @@ class Assessment extends Component {
     const selectedQuestionData = assQuestions.findIndex(
       question => question.id === id,
     )
+
     console.log(selectedQuestionData)
     this.setState({
       selectedQuestionIndex: selectedQuestionData,
