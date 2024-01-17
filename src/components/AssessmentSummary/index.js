@@ -35,7 +35,7 @@ const AssessmentSummary = props => {
         </h1>
         <ul className="question-number-card">
           {questions.map((item, index) => (
-            <button
+            <li
               type="button"
               className={
                 index === selectedQuestionIndex
@@ -46,7 +46,7 @@ const AssessmentSummary = props => {
               onClick={() => onQuestionClick(item.id)}
             >
               {index + 1}
-            </button>
+            </li>
           ))}
         </ul>
       </div>

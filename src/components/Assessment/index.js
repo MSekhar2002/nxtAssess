@@ -117,12 +117,15 @@ class Assessment extends Component {
       isSelected,
       selectedQuestionIndex,
     } = this.state
+    const hours = Math.floor(timer / 3600)
     const minutes = Math.floor(timer / 60)
     const seconds = timer % 60
-    const formattedTimer = `${minutes}:${
-      seconds < 10 ? `0${seconds}` : seconds
-    }`
-    console.log(formattedTimer)
+    const formattedTimer = `${hours
+      .toString()
+      .padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    console.log(selectedOptions)
     const currentQuestion =
       assQuestions[
         selectedQuestionIndex !== null

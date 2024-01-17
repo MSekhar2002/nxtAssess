@@ -10,9 +10,9 @@ const DefaultQuestion = props => {
   } = props
   return (
     <div className="default-container">
-      <h2 className="question-text">
+      <p className="question-text">
         {questionNumber + 1}. {question.questionText}
-      </h2>
+      </p>
       <hr className="horizontal-line" />
       <div className="option-container">
         {question.options.map(option => (

@@ -19,14 +19,14 @@ const Home = () => {
               <span className="span-item">Total Questions: </span>10
             </li>
             <li className="list-item">
-              <span className="span-item">Types of Questions: </span>MSQs
+              <span className="span-item">Types of Questions: </span>MCQs
             </li>
             <li className="list-item">
               <span className="span-item">Duration: </span>10 Mins
             </li>
             <li className="list-item">
-              <span className="span-item">Marks Scheme: </span>Every correct
-              response, get 1 marks
+              <span className="span-item">Marks Scheme: </span>Every Correct
+              response, get 1 mark
             </li>
             <li className="list-item">
               All the progress will be lost, if you reload during the assessment
