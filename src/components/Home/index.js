@@ -25,7 +25,7 @@ const Home = () => {
               <span className="span-item">Duration: </span>10 Mins
             </li>
             <li className="list-item">
-              <span className="span-item">Marks Scheme: </span>Every Correct
+              <span className="span-item">Marking Scheme: </span>Every Correct
               response, get 1 mark
             </li>
             <li className="list-item">

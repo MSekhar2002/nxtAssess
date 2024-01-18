@@ -19,11 +19,11 @@ const Result = props => {
               alt="time up"
               className="result-image"
             />
-            <h1 className="congrats-head">Time is up</h1>
+            <h1 className="congrats-head">Time is up!</h1>
             <p className="about-time">
               You did not complete the assessment within the time
             </p>
-            <h1 className="about-score">Your Score: {score}</h1>
+            <p className="about-score">Your Score: {score}</p>
             <Link to="/assessment">
               <button type="button" className="re-btn">
                 Reattempt

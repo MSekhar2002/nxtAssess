@@ -5,14 +5,15 @@ import Login from './components/Login'
 import Assessment from './components/Assessment'
 import Result from './components/Result'
 import NotFound from './components/NotFound'
+import ProtectedRoute from './components/ProtectedRoute'
 
 const App = () => (
   <BrowserRouter>
     <Switch>
       <Route exact path="/login" component={Login} />
-      <Route exact path="/" component={Home} />
-      <Route exact path="/result" component={Result} />
-      <Route exact path="/assessment" component={Assessment} />
+      <ProtectedRoute exact path="/" component={Home} />
+      <ProtectedRoute exact path="/result" component={Result} />
+      <ProtectedRoute exact path="/assessment" component={Assessment} />
       <Route exact path="/not-found" component={NotFound} />
       <Redirect to="/not-found" />
     </Switch>

@@ -1,11 +1,8 @@
 import {Component} from 'react'
 import Loader from 'react-loader-spinner'
-import './index.css'
 import Header from '../Header'
-import DefaultQuestion from '../DefaultQuestion'
-import ImageQuestion from '../ImageQuestion'
-import SingleSelectQuestion from '../SingleSelectQuestion'
-import AssessmentSummary from '../AssessmentSummary'
+
+import './index.css'
 
 const apiStatusConstants = {
   initial: 'INITIAL',
@@ -16,18 +13,19 @@ const apiStatusConstants = {
 
 class Assessment extends Component {
   state = {
-    assQuestions: [],
+    assessmentQuestion: [],
+    selectedNumberedQuestionIndex: 0,
     currentQuestionIndex: 0,
-    answeredQuestions: 0,
-    unansweredQuestions: 0,
-    timer: 600,
-    selectedOptions: {},
+    answeredQuestionsCount: 0,
+    unansweredQuestionsCount: 0,
+    isClickedQuestionNumber: false,
+    isCorrectOptionClicked: false,
+    isAnyOptionClicked: false,
+    selectedOption: '',
     score: 0,
-    isSelected: false,
-    selectedQuestionIndex: null,
+    timer: 600,
     apiStatus: apiStatusConstants.initial,
     timeUp: true,
-    anyOptionSelected: false,
   }
 
   componentDidMount() {
@@ -39,7 +37,7 @@ class Assessment extends Component {
     this.setState({apiStatus: apiStatusConstants.inProgress})
     const response = await fetch('https://apis.ccbp.in/assess/questions')
     const data = await response.json()
-    // console.log(data)
+    // console.log(data);
     if (response.ok === true) {
       const updatedData = data.questions.map(eachQuestion => ({
         id: eachQuestion.id,
@@ -52,11 +50,12 @@ class Assessment extends Component {
           imageUrl: eachOption.image_url,
         })),
       }))
-      console.log(updatedData)
       this.setState({
-        assQuestions: updatedData,
+        assessmentQuestion: updatedData,
+
         apiStatus: apiStatusConstants.success,
       })
+      console.log(updatedData)
     } else {
       this.setState({apiStatus: apiStatusConstants.failure})
     }
@@ -105,101 +104,6 @@ class Assessment extends Component {
     clearInterval(this.timer)
   }
 
-  renderAssessmentSuccess = () => {
-    const {
-      assQuestions,
-      currentQuestionIndex,
-      selectedOptions,
-      timer,
-      answeredQuestions,
-      unansweredQuestions,
-      score,
-      isSelected,
-      selectedQuestionIndex,
-    } = this.state
-    const hours = Math.floor(timer / 3600)
-    const minutes = Math.floor(timer / 60)
-    const seconds = timer % 60
-    const formattedTimer = `${hours
-      .toString()
-      .padStart(2, '0')}:${minutes
-      .toString()
-      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    console.log(selectedOptions)
-    const currentQuestion =
-      assQuestions[
-        selectedQuestionIndex !== null
-          ? selectedQuestionIndex
-          : currentQuestionIndex
-      ]
-
-    return (
-      <>
-        <div className="assessment-container">
-          <div className="question-container">
-            {currentQuestion && (
-              <div>
-                {currentQuestion.optionsType === 'DEFAULT' && (
-                  <DefaultQuestion
-                    question={currentQuestion}
-                    selectedOption={selectedOptions}
-                    handleOptionSelect={this.handleOptionSelect}
-                    moveToNextQuestion={this.moveToNextQuestion}
-                    questionNumber={
-                      selectedQuestionIndex !== null
-                        ? selectedQuestionIndex
-                        : currentQuestionIndex
-                    }
-                  />
-                )}
-                {currentQuestion.optionsType === 'IMAGE' && (
-                  <ImageQuestion
-                    question={currentQuestion}
-                    selectedOption={selectedOptions}
-                    handleOptionSelect={this.handleOptionSelect}
-                    moveToNextQuestion={this.moveToNextQuestion}
-                    questionNumber={
-                      selectedQuestionIndex !== null
-                        ? selectedQuestionIndex
-                        : currentQuestionIndex
-                    }
-                  />
-                )}
-                {currentQuestion.optionsType === 'SINGLE_SELECT' && (
-                  <SingleSelectQuestion
-                    question={currentQuestion}
-                    selectedOption={selectedOptions}
-                    handleOptionSelect={this.handleOptionSelect}
-                    moveToNextQuestion={this.moveToNextQuestion}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-          <div className="summary-timer-container">
-            <div className="timer-container">
-              <p className="time-heading">Time Left</p>
-              <p className="timer">{formattedTimer}</p>
-            </div>
-            <div className="summary-card">
-              <AssessmentSummary
-                totalQuestions={assQuestions.length}
-                answeredQuestions={answeredQuestions}
-                unansweredQuestions={unansweredQuestions}
-                currentQuestionNo={currentQuestionIndex}
-                questions={assQuestions}
-                isSelected={isSelected}
-                onSubmit={this.onSubmit}
-                onQuestionClick={this.handleQuestionClick}
-                selectedQuestionIndex={selectedQuestionIndex}
-              />
-            </div>
-          </div>
-        </div>
-      </>
-    )
-  }
-
   renderAssessmentFailure = () => (
     <div className="failure-container">
       <div className="failure-content-card">
@@ -227,6 +131,35 @@ class Assessment extends Component {
     </div>
   )
 
+  renderAssessmentSuccess = () => {
+    const {timer} = this.state
+    const hours = Math.floor(timer / 3600)
+    const minutes = Math.floor(timer / 60)
+    const seconds = timer % 60
+    const formattedTimer = `${hours
+      .toString()
+      .padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+
+    return (
+      <div className="assessment-main-container">
+        <div className="assessment-questions-container">
+          {this.renderQuestion()}
+        </div>
+        <div className="summary-timer-container">
+          <div className="timer-container">
+            <p className="time-heading">Time Left</p>
+            <p className="timer">{formattedTimer}</p>
+          </div>
+          <div className="assessment-summary-container">
+            {this.renderAssessmentSummary()}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   renderAssessmentDetails = () => {
     const {apiStatus} = this.state
     console.log(apiStatus)
@@ -242,57 +175,218 @@ class Assessment extends Component {
     }
   }
 
-  handleOptionSelect = optionId => {
-    const {assQuestions, currentQuestionIndex, selectedOptions} = this.state
-    const currentQuestion = assQuestions[currentQuestionIndex]
-    const selectedOptionData = currentQuestion.options.find(
-      option => option.optionId === optionId,
+  onClickSummaryButton = id => {
+    const {assessmentQuestion} = this.state
+    const selectedQuestionData = assessmentQuestion.findIndex(
+      item => item.id === id,
     )
-
-    if (selectedOptionData.isCorrect === 'true') {
-      this.setState(prevState => ({
-        score: prevState.score + 1,
-        isSelected: true,
-      }))
-    } else if (selectedOptions) {
-      this.setState(prevState => ({
-        answeredQuestions: prevState.answeredQuestion + 1,
-        anyOptionSelected: true,
-      }))
-    }
+    console.log(selectedQuestionData)
     this.setState({
-      selectedOptions: optionId,
-      isSelected: true,
-      anyOptionSelected: true,
+      selectedNumberedQuestionIndex: selectedQuestionData,
+      currentQuestionIndex: selectedQuestionData,
+      isClickedQuestionNumber: true,
     })
+    // if (isCorrectOptionClicked) {
+    //   this.setState((prevState) => ({
+    //     score: prevState.score + 1,
+    //   }));
+    // }
   }
 
-  moveToNextQuestion = () => {
-    const {isSelected, anyOptionSelected} = this.state
+  onClickAnswer = id => {
+    const {
+      assessmentQuestion,
+      currentQuestionIndex,
+      selectedOption,
+      isCorrectOptionClicked,
+    } = this.state
 
-    if (isSelected || anyOptionSelected) {
+    const currentQuestion = assessmentQuestion[currentQuestionIndex]
+    const selectedOptionData = currentQuestion.options.find(
+      item => item.optionId === id,
+    )
+
+    if (!isCorrectOptionClicked && selectedOptionData.isCorrect === 'true') {
       this.setState(prevState => ({
-        answeredQuestions: prevState.answeredQuestions + 1,
-        isSelected: false,
-        anyOptionSelected: false,
+        //   score: prevState.score + 1,
+        isCorrectOptionClicked: true,
+      }))
+    } else {
+      this.setState({
+        isAnyOptionClicked: true,
+      })
+    }
+
+    this.setState({selectedOption: id})
+  }
+
+  handleOnClickNextBtn = () => {
+    const {
+      currentQuestionIndex,
+      assessmentQuestion,
+      isCorrectOptionClicked,
+      isAnyOptionClicked,
+    } = this.state
+    if (currentQuestionIndex < assessmentQuestion.length - 1) {
+      this.setState(prevState => ({
+        currentQuestionIndex: prevState.currentQuestionIndex + 1,
+        isClickedQuestionNumber: false,
+      }))
+    }
+    if (isCorrectOptionClicked || isAnyOptionClicked) {
+      this.setState(prevState => ({
+        answeredQuestionsCount: prevState.answeredQuestionsCount + 1,
+        isCorrectOptionClicked: false,
+        isAnyOptionClicked: false,
       }))
     }
     this.setState(prevState => ({
-      currentQuestionIndex: prevState.currentQuestionIndex + 1,
-      selectedOptions: null,
+      score: isCorrectOptionClicked ? prevState.score + 1 : prevState.score,
     }))
   }
 
-  handleQuestionClick = id => {
-    const {assQuestions} = this.state
-    const selectedQuestionData = assQuestions.findIndex(
-      question => question.id === id,
+  renderAssessmentSummary = () => {
+    const {answeredQuestionsCount, assessmentQuestion} = this.state
+    return (
+      <div className="assessment-summary">
+        <div className="answered-unanswered-card">
+          <p className="answered">
+            <span className="answered-span">{answeredQuestionsCount}</span>{' '}
+            Answered Questions
+          </p>
+          <p className="unanswered">
+            <span className="unanswered-span">
+              {' '}
+              {assessmentQuestion.length - answeredQuestionsCount}
+            </span>{' '}
+            Unanswered Questions
+          </p>
+        </div>
+        <hr className="summary-horizontal-line" />
+        <div className="question-submit-btn-card">
+          <div>
+            <h1 className="question-number-heading">
+              Questions ({assessmentQuestion.length})
+            </h1>
+            <ul className="question-number-card">
+              {assessmentQuestion.map((item, index) => (
+                <button
+                  type="button"
+                  className="question-number"
+                  onClick={() => this.onClickSummaryButton(item.id)}
+                  key={item.id}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </ul>
+          </div>
+          <button onClick={this.onSubmit} type="button" className="submit-btn">
+            Submit Assessment
+          </button>
+        </div>
+      </div>
     )
+  }
 
-    console.log(selectedQuestionData)
-    this.setState({
-      selectedQuestionIndex: selectedQuestionData,
-    })
+  renderQuestion = () => {
+    const {
+      assessmentQuestion,
+      currentQuestionIndex,
+      selectedNumberedQuestionIndex,
+      isClickedQuestionNumber,
+      isCorrectOptionClicked,
+      selectedOption,
+      score,
+    } = this.state
+
+    console.log(isCorrectOptionClicked)
+    console.log(selectedOption)
+    const currentQuestion =
+      assessmentQuestion[
+        isClickedQuestionNumber
+          ? selectedNumberedQuestionIndex
+          : currentQuestionIndex
+      ]
+    const questionNumber = isClickedQuestionNumber
+      ? selectedNumberedQuestionIndex
+      : currentQuestionIndex
+
+    const {questionText, options, optionsType} = currentQuestion
+
+    return (
+      <div className="question-main-container">
+        <h1 className="question-text">
+          {questionNumber + 1}. {questionText}
+        </h1>
+        <hr className="horizontal-line" />
+        {optionsType === 'DEFAULT' && (
+          <div className="option-container">
+            {options.map(option => (
+              <button
+                type="button"
+                className={
+                  selectedOption === option.optionId ? 'selected' : 'normal'
+                }
+                onClick={() => this.onClickAnswer(option.optionId)}
+                key={option.optionId}
+              >
+                {option.text}
+              </button>
+            ))}
+          </div>
+        )}
+        {optionsType === 'IMAGE' && (
+          <div className="option-container">
+            {options.map(option => (
+              <img
+                className={
+                  selectedOption === option.optionId
+                    ? 'selectedImg'
+                    : 'normalImg'
+                }
+                onClick={() => this.onClickAnswer(option.optionId)}
+                key={option.optionId}
+                src={option.imageUrl}
+                alt=""
+              />
+            ))}
+          </div>
+        )}
+        {optionsType === 'SINGLE_SELECT' && (
+          <div className="mini-card">
+            <select
+              className="select-card"
+              onChange={e => this.onClickAnswer(e.target.value)}
+            >
+              {options.map(option => (
+                <option
+                  className={
+                    selectedOption === option.optionId
+                      ? 'selectedOption'
+                      : 'normalOption'
+                  }
+                  value={option.optionId}
+                  key={option.optionId}
+                >
+                  {option.text}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div className="btn-card">
+          <p>{score}</p>
+          <button
+            type="button"
+            className="nxt-button"
+            onClick={this.handleOnClickNextBtn}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    )
   }
 
   render() {

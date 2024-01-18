@@ -2,12 +2,12 @@ import './index.css'
 
 const AssessmentSummary = props => {
   const {
-    totalQuestions,
+    // totalQuestions,
     answeredQuestions,
     unansweredQuestions,
     questions,
-    currentQuestionNo,
-    isSelected,
+    // currentQuestionNo,
+    // isSelected,
     onSubmit,
     onQuestionClick,
     selectedQuestionIndex,
