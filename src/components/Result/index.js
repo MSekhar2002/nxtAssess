@@ -23,7 +23,9 @@ const Result = props => {
             <p className="about-time">
               You did not complete the assessment within the time
             </p>
-            <p className="about-score">Your Score: {score}</p>
+            <p className="about-score">
+              Your Score: <span>{score}</span>
+            </p>
             <Link to="/assessment">
               <button type="button" className="re-btn">
                 Reattempt
@@ -40,8 +42,12 @@ const Result = props => {
             <h1 className="congrats-head">
               Congrats! You completed the assessment.
             </h1>
-            <p className="about-time">Time Taken: {formattedTimer}</p>
-            <h1 className="about-score">Your Score: {score}</h1>
+            <p className="about-time">
+              Time Taken: <span>{formattedTimer}</span>
+            </p>
+            <h1 className="about-score">
+              Your Score: <span>{score}</span>
+            </h1>
             <Link to="/assessment">
               <button type="button" className="re-btn">
                 Reattempt

@@ -82,7 +82,7 @@ class Assessment extends Component {
     const {history} = this.props
     const {timeUp} = this.state
 
-    history.replace('/result', {timeUp})
+    history.replace('/results', {timeUp})
     clearInterval(this.timerFunction)
 
     this.setState({
@@ -95,12 +95,15 @@ class Assessment extends Component {
     const {score, timer} = this.state
 
     const minutes = Math.floor(timer / 60)
+    const hours = Math.floor(timer / 3600)
     const seconds = timer % 60
-    const formattedTimer = `${minutes}:${
-      seconds < 10 ? `0${seconds}` : seconds
-    }`
+    const formattedTimer = `${hours
+      .toString()
+      .padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 
-    history.replace('/result', {score, formattedTimer})
+    history.replace('/results', {score, formattedTimer})
     clearInterval(this.timer)
   }
 
@@ -199,12 +202,20 @@ class Assessment extends Component {
       currentQuestionIndex,
       selectedOption,
       isCorrectOptionClicked,
+      isAnyOptionClicked,
     } = this.state
 
     const currentQuestion = assessmentQuestion[currentQuestionIndex]
     const selectedOptionData = currentQuestion.options.find(
       item => item.optionId === id,
     )
+    // if (isCorrectOptionClicked || isAnyOptionClicked) {
+    //   this.setState(prevState => ({
+    //     answeredQuestionsCount: prevState.answeredQuestionsCount + 1,
+    //     isCorrectOptionClicked: false,
+    //     isAnyOptionClicked: false,
+    //   }))
+    // }
 
     if (!isCorrectOptionClicked && selectedOptionData.isCorrect === 'true') {
       this.setState(prevState => ({
@@ -247,6 +258,7 @@ class Assessment extends Component {
 
   renderAssessmentSummary = () => {
     const {answeredQuestionsCount, assessmentQuestion} = this.state
+    const total = assessmentQuestion.length
     return (
       <div className="assessment-summary">
         <div className="answered-unanswered-card">
@@ -265,9 +277,7 @@ class Assessment extends Component {
         <hr className="summary-horizontal-line" />
         <div className="question-submit-btn-card">
           <div>
-            <h1 className="question-number-heading">
-              Questions ({assessmentQuestion.length})
-            </h1>
+            <h1 className="question-number-heading">Questions ({total})</h1>
             <ul className="question-number-card">
               {assessmentQuestion.map((item, index) => (
                 <button
@@ -312,13 +322,13 @@ class Assessment extends Component {
       ? selectedNumberedQuestionIndex
       : currentQuestionIndex
 
-    const {questionText, options, optionsType} = currentQuestion
+    const {questionText, options, optionsType, text} = currentQuestion
 
     return (
       <div className="question-main-container">
-        <h1 className="question-text">
+        <p className="question-text">
           {questionNumber + 1}. {questionText}
-        </h1>
+        </p>
         <hr className="horizontal-line" />
         {optionsType === 'DEFAULT' && (
           <div className="option-container">
@@ -348,32 +358,37 @@ class Assessment extends Component {
                 onClick={() => this.onClickAnswer(option.optionId)}
                 key={option.optionId}
                 src={option.imageUrl}
-                alt=""
+                alt={text}
               />
             ))}
           </div>
         )}
         {optionsType === 'SINGLE_SELECT' && (
-          <div className="mini-card">
-            <select
-              className="select-card"
-              onChange={e => this.onClickAnswer(e.target.value)}
-            >
-              {options.map(option => (
-                <option
-                  className={
-                    selectedOption === option.optionId
-                      ? 'selectedOption'
-                      : 'normalOption'
-                  }
-                  value={option.optionId}
-                  key={option.optionId}
-                >
-                  {option.text}
-                </option>
-              ))}
-            </select>
-          </div>
+          <>
+            <div className="mini-card">
+              <select
+                className="select-card"
+                onChange={e => this.onClickAnswer(e.target.value)}
+              >
+                {options.map(option => (
+                  <option
+                    className={
+                      selectedOption === option.optionId
+                        ? 'selectedOption'
+                        : 'normalOption'
+                    }
+                    value={option.optionId}
+                    key={option.optionId}
+                  >
+                    {option.text}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="selected-by-default">
+              First option is selected by default
+            </p>
+          </>
         )}
         <div className="btn-card">
           <p>{score}</p>
@@ -382,7 +397,7 @@ class Assessment extends Component {
             className="nxt-button"
             onClick={this.handleOnClickNextBtn}
           >
-            Next
+            Next Question
           </button>
         </div>
       </div>
