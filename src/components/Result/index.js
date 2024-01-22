@@ -6,7 +6,7 @@ import './result.css'
 const Result = props => {
   const {location} = props
   const {state} = location
-  const {score, formattedTimer, timeUp} = state
+  const {score, formattedRemainingTime, timeUp} = state
 
   return (
     <>
@@ -43,7 +43,7 @@ const Result = props => {
               Congrats! You completed the assessment.
             </h1>
             <p className="about-time">
-              Time Taken: <span>{formattedTimer}</span>
+              Time Taken: <span>{formattedRemainingTime}</span>
             </p>
             <h1 className="about-score">
               Your Score: <span>{score}</span>

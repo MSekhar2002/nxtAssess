@@ -90,6 +90,28 @@ class Assessment extends Component {
     })
   }
 
+  timeToSeconds = formattedTime => {
+    const timeArray = formattedTime.split(':')
+    const hours = parseInt(timeArray[0], 10) || 0
+    const minutes = parseInt(timeArray[1], 10) || 0
+    const seconds = parseInt(timeArray[2], 10) || 0
+
+    return hours * 3600 + minutes * 60 + seconds
+  }
+
+  secondsToTime = seconds => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const remainingSeconds = seconds % 60
+
+    const formattedTime = `${hours
+      .toString()
+      .padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+    return formattedTime
+  }
+
   onSubmit = () => {
     const {history} = this.props
     const {score, timer} = this.state
@@ -102,8 +124,11 @@ class Assessment extends Component {
       .padStart(2, '0')}:${minutes
       .toString()
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    const remainingSeconds = 600 - this.timeToSeconds(formattedTimer)
+    const formattedRemainingTime = this.secondsToTime(remainingSeconds)
+    console.log(formattedRemainingTime)
 
-    history.replace('/results', {score, formattedTimer})
+    history.replace('/results', {score, formattedRemainingTime})
     clearInterval(this.timer)
   }
 
@@ -139,6 +164,7 @@ class Assessment extends Component {
     const hours = Math.floor(timer / 3600)
     const minutes = Math.floor(timer / 60)
     const seconds = timer % 60
+    console.log(seconds)
     const formattedTimer = `${hours
       .toString()
       .padStart(2, '0')}:${minutes
@@ -217,15 +243,17 @@ class Assessment extends Component {
     //   }))
     // }
 
-    if (!isCorrectOptionClicked && selectedOptionData.isCorrect === 'true') {
+    if (selectedOptionData.isCorrect === 'true') {
       this.setState(prevState => ({
-        //   score: prevState.score + 1,
+        score: !isCorrectOptionClicked ? prevState.score + 1 : prevState.score,
         isCorrectOptionClicked: true,
       }))
-    } else {
-      this.setState({
+    }
+    if (!isAnyOptionClicked) {
+      this.setState(prevState => ({
+        answeredQuestionsCount: prevState.answeredQuestionsCount + 1,
         isAnyOptionClicked: true,
-      })
+      }))
     }
 
     this.setState({selectedOption: id})
@@ -244,21 +272,37 @@ class Assessment extends Component {
         isClickedQuestionNumber: false,
       }))
     }
-    if (isCorrectOptionClicked || isAnyOptionClicked) {
-      this.setState(prevState => ({
-        answeredQuestionsCount: prevState.answeredQuestionsCount + 1,
-        isCorrectOptionClicked: false,
-        isAnyOptionClicked: false,
-      }))
-    }
+    // if (isCorrectOptionClicked || isAnyOptionClicked) {
+    //   this.setState(prevState => ({
+    //     answeredQuestionsCount: prevState.answeredQuestionsCount + 1,
+    //     isCorrectOptionClicked: false,
+    //     isAnyOptionClicked: false,
+    //   }))
+    // }
     this.setState(prevState => ({
-      score: isCorrectOptionClicked ? prevState.score + 1 : prevState.score,
+      //   score: isCorrectOptionClicked ? prevState.score + 1 : prevState.score,
+      isAnyOptionClicked: false,
+      isCorrectOptionClicked: false,
     }))
   }
 
   renderAssessmentSummary = () => {
-    const {answeredQuestionsCount, assessmentQuestion} = this.state
+    const {
+      answeredQuestionsCount,
+      assessmentQuestion,
+      isClickedQuestionNumber,
+      isAnyOptionClicked,
+      currentQuestionIndex,
+    } = this.state
     const total = assessmentQuestion.length
+
+    const attemptedQuestions = new Set()
+
+    if (isClickedQuestionNumber && answeredQuestionsCount > 0) {
+      for (let i = 0; i <= currentQuestionIndex; i += 1) {
+        attemptedQuestions.add(i)
+      }
+    }
     return (
       <div className="assessment-summary">
         <div className="answered-unanswered-card">
@@ -282,7 +326,15 @@ class Assessment extends Component {
               {assessmentQuestion.map((item, index) => (
                 <button
                   type="button"
-                  className="question-number"
+                  className={`${
+                    index === currentQuestionIndex && isClickedQuestionNumber
+                      ? 'question-number-selected'
+                      : 'question-number'
+                  } ${
+                    attemptedQuestions.has(index) && isAnyOptionClicked
+                      ? 'attempted'
+                      : 'question-number'
+                  }`}
                   onClick={() => this.onClickSummaryButton(item.id)}
                   key={item.id}
                 >
@@ -322,7 +374,9 @@ class Assessment extends Component {
       ? selectedNumberedQuestionIndex
       : currentQuestionIndex
 
-    const {questionText, options, optionsType, text} = currentQuestion
+    const isLastQuestion = questionNumber === assessmentQuestion.length - 1
+
+    const {questionText, options, optionsType} = currentQuestion
 
     return (
       <div className="question-main-container">
@@ -358,7 +412,7 @@ class Assessment extends Component {
                 onClick={() => this.onClickAnswer(option.optionId)}
                 key={option.optionId}
                 src={option.imageUrl}
-                alt={text}
+                alt={option.text}
               />
             ))}
           </div>
@@ -392,13 +446,15 @@ class Assessment extends Component {
         )}
         <div className="btn-card">
           <p>{score}</p>
-          <button
-            type="button"
-            className="nxt-button"
-            onClick={this.handleOnClickNextBtn}
-          >
-            Next Question
-          </button>
+          {isLastQuestion ? null : (
+            <button
+              type="button"
+              className="nxt-button"
+              onClick={this.handleOnClickNextBtn}
+            >
+              Next Question
+            </button>
+          )}
         </div>
       </div>
     )
