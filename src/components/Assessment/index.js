@@ -21,7 +21,7 @@ class Assessment extends Component {
     isClickedQuestionNumber: false,
     isCorrectOptionClicked: false,
     isAnyOptionClicked: false,
-    selectedOption: '',
+    selectedOption: {},
     score: 0,
     timer: 600,
     apiStatus: apiStatusConstants.initial,
@@ -214,6 +214,7 @@ class Assessment extends Component {
       selectedNumberedQuestionIndex: selectedQuestionData,
       currentQuestionIndex: selectedQuestionData,
       isClickedQuestionNumber: true,
+      isAnyOptionClicked: false,
     })
     // if (isCorrectOptionClicked) {
     //   this.setState((prevState) => ({
@@ -256,7 +257,12 @@ class Assessment extends Component {
       }))
     }
 
-    this.setState({selectedOption: id})
+    this.setState(prevState => ({
+      selectedOption: {
+        ...prevState.selectedOption,
+        [currentQuestionIndex]: id,
+      },
+    }))
   }
 
   handleOnClickNextBtn = () => {
@@ -374,12 +380,14 @@ class Assessment extends Component {
       ? selectedNumberedQuestionIndex
       : currentQuestionIndex
 
+    const selectedOptionId = selectedOption[questionNumber]
+
     const isLastQuestion = questionNumber === assessmentQuestion.length - 1
 
     const {questionText, options, optionsType} = currentQuestion
 
     return (
-      <div className="question-main-container">
+      <div data-testid="questionItem" className="question-main-container">
         <p className="question-text">
           {questionNumber + 1}. {questionText}
         </p>
@@ -390,7 +398,7 @@ class Assessment extends Component {
               <button
                 type="button"
                 className={
-                  selectedOption === option.optionId ? 'selected' : 'normal'
+                  selectedOptionId === option.optionId ? 'selected' : 'normal'
                 }
                 onClick={() => this.onClickAnswer(option.optionId)}
                 key={option.optionId}
@@ -405,7 +413,7 @@ class Assessment extends Component {
             {options.map(option => (
               <img
                 className={
-                  selectedOption === option.optionId
+                  selectedOptionId === option.optionId
                     ? 'selectedImg'
                     : 'normalImg'
                 }
@@ -427,7 +435,7 @@ class Assessment extends Component {
                 {options.map(option => (
                   <option
                     className={
-                      selectedOption === option.optionId
+                      selectedOptionId === option.optionId
                         ? 'selectedOption'
                         : 'normalOption'
                     }
