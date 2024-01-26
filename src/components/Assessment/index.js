@@ -205,21 +205,22 @@ class Assessment extends Component {
   }
 
   onClickSummaryButton = id => {
-    const {assessmentQuestion} = this.state
+    const {assessmentQuestion, isCorrectOptionClicked} = this.state
     const selectedQuestionData = assessmentQuestion.findIndex(
       item => item.id === id,
     )
     console.log(selectedQuestionData)
-    this.setState({
+    this.setState(prevState => ({
+      isAnyOptionClicked: !prevState.isAnyOptionClicked,
+      isCorrectOptionClicked: !prevState.isCorrectOptionClicked,
       selectedNumberedQuestionIndex: selectedQuestionData,
       currentQuestionIndex: selectedQuestionData,
       isClickedQuestionNumber: true,
-      isAnyOptionClicked: false,
-    })
+    }))
     // if (isCorrectOptionClicked) {
-    //   this.setState((prevState) => ({
+    //   this.setState(prevState => ({
     //     score: prevState.score + 1,
-    //   }));
+    //   }))
     // }
   }
 
@@ -312,17 +313,12 @@ class Assessment extends Component {
     return (
       <div className="assessment-summary">
         <div className="answered-unanswered-card">
-          <p className="answered">
-            <span className="answered-span">{answeredQuestionsCount}</span>{' '}
-            Answered Questions
+          <p className="answered-span">{answeredQuestionsCount}</p>
+          <p className="answered">Answered Questions</p>
+          <p className="unanswered-span">
+            {assessmentQuestion.length - answeredQuestionsCount}
           </p>
-          <p className="unanswered">
-            <span className="unanswered-span">
-              {' '}
-              {assessmentQuestion.length - answeredQuestionsCount}
-            </span>{' '}
-            Unanswered Questions
-          </p>
+          <p className="unanswered">Unanswered Questions</p>
         </div>
         <hr className="summary-horizontal-line" />
         <div className="question-submit-btn-card">
@@ -330,22 +326,23 @@ class Assessment extends Component {
             <h1 className="question-number-heading">Questions ({total})</h1>
             <ul className="question-number-card">
               {assessmentQuestion.map((item, index) => (
-                <button
-                  type="button"
-                  className={`${
-                    index === currentQuestionIndex && isClickedQuestionNumber
-                      ? 'question-number-selected'
-                      : 'question-number'
-                  } ${
-                    attemptedQuestions.has(index) && isAnyOptionClicked
-                      ? 'attempted'
-                      : 'question-number'
-                  }`}
-                  onClick={() => this.onClickSummaryButton(item.id)}
-                  key={item.id}
-                >
-                  {index + 1}
-                </button>
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className={`${
+                      index === currentQuestionIndex && isClickedQuestionNumber
+                        ? 'question-number-selected'
+                        : 'question-number'
+                    } ${
+                      attemptedQuestions.has(index) && isAnyOptionClicked
+                        ? 'attempted'
+                        : 'question-number'
+                    }`}
+                    onClick={() => this.onClickSummaryButton(item.id)}
+                  >
+                    {index + 1}
+                  </button>
+                </li>
               ))}
             </ul>
           </div>
@@ -393,37 +390,39 @@ class Assessment extends Component {
         </p>
         <hr className="horizontal-line" />
         {optionsType === 'DEFAULT' && (
-          <div className="option-container">
+          <ul className="option-container">
             {options.map(option => (
-              <button
-                type="button"
-                className={
-                  selectedOptionId === option.optionId ? 'selected' : 'normal'
-                }
-                onClick={() => this.onClickAnswer(option.optionId)}
-                key={option.optionId}
-              >
-                {option.text}
-              </button>
+              <li key={option.optionId}>
+                <button
+                  type="button"
+                  className={
+                    selectedOptionId === option.optionId ? 'selected' : 'normal'
+                  }
+                  onClick={() => this.onClickAnswer(option.optionId)}
+                >
+                  {option.text}
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
         {optionsType === 'IMAGE' && (
-          <div className="option-container">
+          <ul className="option-container">
             {options.map(option => (
-              <img
-                className={
-                  selectedOptionId === option.optionId
-                    ? 'selectedImg'
-                    : 'normalImg'
-                }
-                onClick={() => this.onClickAnswer(option.optionId)}
-                key={option.optionId}
-                src={option.imageUrl}
-                alt={option.text}
-              />
+              <li key={option.optionId}>
+                <img
+                  className={
+                    selectedOptionId === option.optionId
+                      ? 'selectedImg'
+                      : 'normalImg'
+                  }
+                  onClick={() => this.onClickAnswer(option.optionId)}
+                  src={option.imageUrl}
+                  alt={option.text}
+                />
+              </li>
             ))}
-          </div>
+          </ul>
         )}
         {optionsType === 'SINGLE_SELECT' && (
           <>

@@ -1,5 +1,5 @@
 import {Link} from 'react-router-dom'
-import Header from '../Header'
+import Cookies from 'js-cookie'
 
 import './result.css'
 
@@ -7,10 +7,30 @@ const Result = props => {
   const {location} = props
   const {state} = location
   const {score, formattedRemainingTime, timeUp} = state
+  const onClickLogout = () => {
+    const {history} = props
+    Cookies.remove('jwt_token')
+    history.replace('/login')
+    console.log('clicked')
+    console.log(Cookies.remove('jwt_token'))
+  }
 
   return (
     <>
-      <Header />
+      <nav className="nav-container">
+        <div className="item-container">
+          <Link to="/">
+            <img
+              src="https://res.cloudinary.com/dzaz9bsnw/image/upload/v1704821765/Group_8005_vgjmvh.jpg"
+              alt="website logo"
+              className="image"
+            />
+          </Link>
+        </div>
+        <button onClick={onClickLogout} type="button" className="btn">
+          Logout
+        </button>
+      </nav>
       <div className="bg-container">
         {timeUp ? (
           <div className="result-container">
@@ -23,9 +43,10 @@ const Result = props => {
             <p className="about-time">
               You did not complete the assessment within the time
             </p>
-            <p className="about-score">
-              Your Score: <span>{score}</span>
-            </p>
+            <div className="time-card">
+              <p className="about-score">Your Score:</p>
+              <p className="score-text">{score}</p>
+            </div>
             <Link to="/assessment">
               <button type="button" className="re-btn">
                 Reattempt
@@ -42,12 +63,14 @@ const Result = props => {
             <h1 className="congrats-head">
               Congrats! You completed the assessment.
             </h1>
-            <p className="about-time">
-              Time Taken: <span>{formattedRemainingTime}</span>
-            </p>
-            <h1 className="about-score">
-              Your Score: <span>{score}</span>
-            </h1>
+            <div className="time-card">
+              <p className="about-time">Time Taken:</p>
+              <p className="formatted-time-text">{formattedRemainingTime}</p>
+            </div>
+            <div className="time-card">
+              <p className="about-score">Your Score:</p>
+              <p className="score-text">{score}</p>
+            </div>
             <Link to="/assessment">
               <button type="button" className="re-btn">
                 Reattempt
