@@ -205,13 +205,13 @@ class Assessment extends Component {
   }
 
   onClickSummaryButton = id => {
-    const {assessmentQuestion, isCorrectOptionClicked} = this.state
+    const {assessmentQuestion} = this.state
     const selectedQuestionData = assessmentQuestion.findIndex(
       item => item.id === id,
     )
     console.log(selectedQuestionData)
     this.setState(prevState => ({
-      isAnyOptionClicked: !prevState.isAnyOptionClicked,
+      isAnyOptionClicked: false,
       isCorrectOptionClicked: !prevState.isCorrectOptionClicked,
       selectedNumberedQuestionIndex: selectedQuestionData,
       currentQuestionIndex: selectedQuestionData,
@@ -228,9 +228,10 @@ class Assessment extends Component {
     const {
       assessmentQuestion,
       currentQuestionIndex,
-      selectedOption,
       isCorrectOptionClicked,
       isAnyOptionClicked,
+      answeredQuestionsCount,
+      selectedOption,
     } = this.state
 
     const currentQuestion = assessmentQuestion[currentQuestionIndex]
@@ -251,10 +252,9 @@ class Assessment extends Component {
         isCorrectOptionClicked: true,
       }))
     }
-    if (!isAnyOptionClicked) {
+    if (!selectedOption[currentQuestionIndex]) {
       this.setState(prevState => ({
         answeredQuestionsCount: prevState.answeredQuestionsCount + 1,
-        isAnyOptionClicked: true,
       }))
     }
 
@@ -267,12 +267,7 @@ class Assessment extends Component {
   }
 
   handleOnClickNextBtn = () => {
-    const {
-      currentQuestionIndex,
-      assessmentQuestion,
-      isCorrectOptionClicked,
-      isAnyOptionClicked,
-    } = this.state
+    const {currentQuestionIndex, assessmentQuestion} = this.state
     if (currentQuestionIndex < assessmentQuestion.length - 1) {
       this.setState(prevState => ({
         currentQuestionIndex: prevState.currentQuestionIndex + 1,
@@ -362,7 +357,7 @@ class Assessment extends Component {
       isClickedQuestionNumber,
       isCorrectOptionClicked,
       selectedOption,
-      score,
+      //   score,
     } = this.state
 
     console.log(isCorrectOptionClicked)
@@ -452,7 +447,6 @@ class Assessment extends Component {
           </>
         )}
         <div className="btn-card">
-          <p>{score}</p>
           {isLastQuestion ? null : (
             <button
               type="button"

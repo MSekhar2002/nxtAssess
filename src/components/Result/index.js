@@ -11,8 +11,6 @@ const Result = props => {
     const {history} = props
     Cookies.remove('jwt_token')
     history.replace('/login')
-    console.log('clicked')
-    console.log(Cookies.remove('jwt_token'))
   }
 
   return (
